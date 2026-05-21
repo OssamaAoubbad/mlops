@@ -1,0 +1,11 @@
+venv
+.venv
+env
+__pycache__
+*.pyc
+.git
+.gitignore
+mlruns
+efs
+data
+notebooks

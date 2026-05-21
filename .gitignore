@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment files
+.env
+.env.*
+
+# Logs
+logs/*.log
+*.log
+
+# Local ML/Ray/MLflow artifacts
+efs/
+mlruns/
+ray_results/
+
+# Model and checkpoint artifacts
+*.pt
+*.pth
+*.ckpt
+*.pkl
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+
+/datasets
+

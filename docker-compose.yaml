@@ -1,0 +1,122 @@
+
+services:
+  jenkins:
+    build:
+      context: .
+      dockerfile: jn.Dockerfile
+    container_name: jenkins-mlops
+    user: root # Required to read the host's docker.sock
+    ports:
+      - "8090:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+      # Mount the Docker socket so Jenkins can spin up the Python agent
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - mlops-net
+
+  hugging-face-serve:
+    profiles:
+      - serve
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${DOCKER_IMAGE:-hugging-face-classifier:monitoring}
+    shm_size: 3g
+    ports:
+      - "8000:8000"
+    environment:
+      GITHUB_USERNAME: ${GITHUB_USERNAME:-jenkins}
+      MADEWITHML_EFS_DIR: /mlops-storage
+      # HF_HOME: /app/.hf_cache
+      # TRANSFORMERS_CACHE: /app/.hf_cache/transformers
+    volumes:
+      - mlops_storage:/mlops-storage
+      # - hf_cache:/app/.hf_cache
+    command: >
+      python -m madewithml.serve
+      --run_id ${RUN_ID:-missing-run-id}
+      --host 0.0.0.0
+      --port 8000
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
+    networks:
+      - mlops-net
+
+  cadvisor:
+    image: google/cadvisor:latest
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+    networks:
+      - mlops-net
+
+  mock-metrics:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mock-metrics
+    ports:
+      - "9091:9091"
+    command: >
+      python -m madewithml.mock_metrics_exporter
+    restart: unless-stopped
+    networks:
+      - mlops-net
+
+  prometheus:
+    image: prom/prometheus:v2.52.0
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.console.libraries=/usr/share/prometheus/console_libraries"
+      - "--web.console.templates=/usr/share/prometheus/consoles"
+    restart: unless-stopped
+    networks:
+      - mlops-net
+
+  grafana:
+    image: grafana/grafana:10.4.2
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - mlops-net
+
+volumes:
+  jenkins_data:
+  mlops_storage:
+    name: hugging_face_classifier_storage
+  hf_cache:
+  prometheus_data:
+  grafana_data:
+
+networks:
+  mlops-net:
+    driver: bridge

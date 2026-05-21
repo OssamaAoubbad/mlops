@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "model-monitor",
+    "title": "Model Monitoring",
+    "tags": ["model", "monitoring", "mlops"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "description": "Monitor model predictions, confidence, errors and throughput",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "type": "timeseries",
+        "title": "Predictions per Second",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(rate(model_predictions_total[1m]))", "legendFormat": "predictions/s", "refId": "A"}
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "type": "timeseries",
+        "title": "Average Prediction Confidence",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "avg(model_prediction_confidence)", "legendFormat": "avg confidence", "refId": "A"}
+        ]
+      },
+      {
+        "id": 3,
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
+        "type": "stat",
+        "title": "Total Prediction Errors",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(model_prediction_errors_total)", "refId": "A"}
+        ]
+      },
+      {
+        "id": 4,
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 8},
+        "type": "stat",
+        "title": "Model Throughput (5m)",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(rate(model_predictions_total[5m]))", "refId": "A"}
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14},
+        "type": "timeseries",
+        "title": "Predictions by Tag",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(rate(model_predictions_total[5m])) by (prediction)", "legendFormat": "{{prediction}}", "refId": "A"}
+        ]
+      }
+    ],
+    "annotations": {"list": []}
+  },
+  "overwrite": true
+}
+

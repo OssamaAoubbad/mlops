@@ -1,0 +1,72 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "jenkins-dash",
+    "title": "Jenkins",
+    "tags": ["jenkins", "ci/cd", "monitoring"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "description": "Monitor Jenkins pipeline and build metrics",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "type": "timeseries",
+        "title": "Build Rate (builds/sec)",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(rate(jenkins_builds_total[5m]))", "legendFormat": "builds/s", "refId": "A"}
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "type": "stat",
+        "title": "Total Jenkins Builds",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(jenkins_builds_total)", "refId": "A"}
+        ]
+      },
+      {
+        "id": 3,
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
+        "type": "stat",
+        "title": "Successful Builds",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(jenkins_builds_success)", "refId": "A"}
+        ]
+      },
+      {
+        "id": 4,
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 8},
+        "type": "stat",
+        "title": "Failed Builds",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(jenkins_builds_failed)", "refId": "A"}
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14},
+        "type": "timeseries",
+        "title": "Build Duration (seconds)",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(jenkins_job_last_build_duration_seconds) by (job)", "legendFormat": "{{job}}", "refId": "A"}
+        ]
+      }
+    ],
+    "annotations": {"list": []}
+  },
+  "overwrite": true
+}
+

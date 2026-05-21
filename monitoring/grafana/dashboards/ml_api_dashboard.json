@@ -1,0 +1,88 @@
+{
+  "dashboard": {
+    "id": null,
+    "uid": "ml-api-dash",
+    "title": "ML API Dashboard",
+    "tags": ["ml", "api", "mlops"],
+    "timezone": "browser",
+    "schemaVersion": 38,
+    "version": 1,
+    "refresh": "30s",
+    "description": "Monitor ML API requests, latency, errors, and status codes",
+    "time": {
+      "from": "now-6h",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "type": "timeseries",
+        "title": "API Requests per Second",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {
+            "expr": "sum(rate(api_requests_total[1m]))",
+            "legendFormat": "requests/s",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "type": "timeseries",
+        "title": "Request Latency (p50/p95/p99)",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "histogram_quantile(0.5, sum(rate(request_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p50", "refId": "A"},
+          {"expr": "histogram_quantile(0.95, sum(rate(request_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p95", "refId": "B"},
+          {"expr": "histogram_quantile(0.99, sum(rate(request_latency_seconds_bucket[5m])) by (le))", "legendFormat": "p99", "refId": "C"}
+        ]
+      },
+      {
+        "id": 3,
+        "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
+        "type": "stat",
+        "title": "HTTP 200 (Success)",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(api_requests_total{http_status=\"200\"})", "refId": "A"}
+        ]
+      },
+      {
+        "id": 4,
+        "gridPos": {"h": 6, "w": 8, "x": 8, "y": 8},
+        "type": "stat",
+        "title": "HTTP Errors (4xx+5xx)",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(api_requests_total{http_status=~\"[45][0-9][0-9]\"})", "refId": "A"}
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 6, "w": 8, "x": 16, "y": 8},
+        "type": "gauge",
+        "title": "In-Progress Requests",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(in_progress_requests)", "refId": "A"}
+        ]
+      },
+      {
+        "id": 6,
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 14},
+        "type": "timeseries",
+        "title": "Requests by Status Code",
+        "datasource": {"type": "prometheus", "uid": "prometheus", "name": "Prometheus"},
+        "targets": [
+          {"expr": "sum(rate(api_requests_total[5m])) by (http_status)", "legendFormat": "status {{http_status}}", "refId": "A"}
+        ]
+      }
+    ],
+    "annotations": {"list": []}
+  },
+  "overwrite": true
+}
+

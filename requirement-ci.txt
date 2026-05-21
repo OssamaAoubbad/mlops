@@ -1,0 +1,32 @@
+# Core dependencies for CI/CD pipeline
+
+# MLOps & Training
+mlflow==2.3.1
+torch==2.0.0
+scikit-learn==1.2.2
+pandas==2.0.1
+numpy==1.26.3
+
+# Data processing
+nltk==3.8.1
+hyperopt==0.2.7
+snorkel==0.9.9
+SQLAlchemy==1.4.48
+numpyencoder==0.3.0
+python-dotenv==1.0.0
+
+# CLI & API
+typer==0.9.0
+fastapi==0.95.2
+click==8.1.7
+uvicorn==0.22.0
+prometheus-client==0.16.0
+
+# Testing
+pytest==7.3.1
+pytest-cov==4.0.0
+
+# Code quality (optional but recommended for CI)
+black==23.3.0
+flake8==6.0.0
+isort==5.12.0
